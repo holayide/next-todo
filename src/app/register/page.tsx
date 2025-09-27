@@ -6,8 +6,8 @@ import { useForm } from "react-hook-form";
 import { useState } from "react";
 import Link from "next/link";
 
-import { loginSchema, type LoginSchema } from "@/schemas/auth-schema";
-import { useLogin } from "@/services/queries";
+import { registerSchema, type RegisterSchema } from "@/schemas/auth-schema";
+import { useRegister } from "@/services/queries";
 import {
   Button,
   Card,
@@ -19,9 +19,11 @@ import {
   Label,
 } from "@/components/index";
 
-function LoginPage() {
+export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false);
-  const { mutate: loginUser, isPending } = useLogin();
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const { mutate, isPending } = useRegister();
+
   const router = useRouter();
 
   const {
@@ -29,12 +31,12 @@ function LoginPage() {
     handleSubmit,
     formState: { errors },
     reset,
-  } = useForm<LoginSchema>({
-    resolver: zodResolver(loginSchema),
+  } = useForm<RegisterSchema>({
+    resolver: zodResolver(registerSchema),
   });
 
-  const onSubmit = (data: LoginSchema) => {
-    loginUser(data, {
+  const onSubmit = (data: RegisterSchema) => {
+    mutate(data, {
       onSuccess: () => {
         router.push("/home");
         reset();
@@ -51,22 +53,41 @@ function LoginPage() {
             <div className="w-6 h-6 rounded bg-primary"></div>
           </div>
           <h1 className="text-2xl font-semibold text-foreground mb-2 text-balance">
-            Welcome back
+            Create your account
           </h1>
           <p className="text-muted-foreground text-sm">
-            Sign in to continue to your dashboard
+            Join thousands of professionals already using our todo app
           </p>
         </div>
 
         <Card className="border-border/50 shadow-lg">
           <CardHeader className="space-y-1 pb-4">
-            <CardTitle className="text-xl font-medium">Sign in</CardTitle>
+            <CardTitle className="text-xl font-medium">Get started</CardTitle>
             <CardDescription>
-              Enter your credentials to access your account
+              Fill in your details to create your account
             </CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+              {/* Name Fields */}
+              <div className="space-y-2">
+                <Label htmlFor="firstName" className="text-sm font-medium">
+                  Name
+                </Label>
+                <Input
+                  {...register("name")}
+                  id="Name"
+                  type="text"
+                  placeholder="John Doe"
+                  className="h-11 border-border/60 focus:border-primary"
+                />
+                {errors.name && (
+                  <p className="text-red-500 text-sm mt-1">
+                    {errors.name.message}
+                  </p>
+                )}
+              </div>
+
               {/* Email */}
               <div className="space-y-2">
                 <Label htmlFor="email" className="text-sm font-medium">
@@ -114,6 +135,41 @@ function LoginPage() {
                 )}
               </div>
 
+              {/* Confirm Password */}
+              <div className="space-y-2">
+                <Label
+                  htmlFor="confirmPassword"
+                  className="text-sm font-medium"
+                >
+                  Confirm password
+                </Label>
+                <div className="relative">
+                  <Input
+                    {...register("confirmPassword")}
+                    id="confirmPassword"
+                    type={showConfirmPassword ? "text" : "password"}
+                    placeholder="Confirm your password"
+                    className="h-11 border-border/60 focus:border-primary pr-10"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+                  >
+                    {showConfirmPassword ? (
+                      <EyeOff size={16} />
+                    ) : (
+                      <Eye size={16} />
+                    )}
+                  </button>
+                </div>
+                {errors.confirmPassword && (
+                  <p className="text-red-500 text-sm mt-1">
+                    {errors.confirmPassword.message}
+                  </p>
+                )}
+              </div>
+
               {/* Submit Button */}
               <Button
                 type="submit"
@@ -136,13 +192,13 @@ function LoginPage() {
 
             {/* Sign In Link */}
             <div className="text-center mt-6 pt-4 border-t border-border/50">
-              <p className="text-sm texta-muted-foreground">
+              <p className="text-sm text-muted-foreground">
                 Already have an account?{" "}
                 <Link
-                  href="/register"
+                  href="/"
                   className="text-primary hover:underline font-medium"
                 >
-                  Sign up
+                  Sign in
                 </Link>
               </p>
             </div>
@@ -152,5 +208,3 @@ function LoginPage() {
     </div>
   );
 }
-
-export default LoginPage;
